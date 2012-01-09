@@ -1,0 +1,7 @@
+## Interface: 40200
+## Title: Asku's Auras
+## Author: Askunia - EU Zenedar ( Horde ofc ! )
+## SavedVariablesPerCharacter: ASAuras_DB
+## Notes: My own personal Auras!
+
+ASAuras.lua
