@@ -18,6 +18,7 @@ function ASAuras:ADDON_LOADED(...)
 	SlashCmdList["ASAuras"] = function(message)
 		ASAuras:Command(message);
 	end
+	
 	activeTalentGroup = GetActiveTalentGroup(false,false)
 end
 
@@ -194,17 +195,22 @@ function ASAuras:PLAYER_FOCUS_CHANGED(...)
 	end
 end
 
-
 function ASAuras:COMBAT_LOG_EVENT_UNFILTERED(log_event, timestamp, event, hideCaster, srcGUID, srcName, srcFlags, srcFlags2, dstGUID, dstName, dstFlags, destFlags2, ...)
 	if (event=="SPELL_AURA_APPLIED") then
 		local spellId, spellName, spellSchool = select(1, ...)
-		if ASAuras_DB[spellId] and srcGUID == UnitGUID("player") then
-			ASAuras:AuraApplied(dstGUID,spellId)
+		if ASAuras_DB[spellId] then
+			if UnitGUID("player") == dstGUID and ASAuras_DB[spellId].target == "player" then -- Buff or Debuff on the Player
+				ASAuras:AuraApplied(dstGUID,spellId)
+			elseif UnitGUID("target") == dstGUID and ASAuras_DB[spellId].target == "target" then -- Buff or Debuff on the Target
+				ASAuras:AuraApplied(dstGUID,spellId)
+			elseif UnitGUID("focus") == dstGUID and ASAuras_DB[spellId}.target = "focus" then -- Buff or Debuff on the Focus
+				ASAuras:AuraApplied(dstGUID,spellId)
+			end
 		end
 	end
 	if (event=="SPELL_AURA_REMOVED") then
 		local spellId, spellName, spellSchool = select(1, ...)
-		if ASAuras_DB[spellId] and srcGUID == UnitGUID("player") then
+		if ASAuras_DB[spellId] and auraframes[spellId] then
 			ASAuras:AuraRemoved(dstGUID,spellId)
 		end
 	end
@@ -223,42 +229,37 @@ function ASAuras:GetUnitByGUID(guid)
 end
 
 function ASAuras:AuraApplied(dstGUID,spellId)
-	local unitGUID = UnitGUID(ASAuras_DB[spellId].target)
-	if ( dstGUID == unitGUID ) then
-		if ( auraframes == nil ) then
+	if ( auraframes == nil ) then
+		if ASAuras_DB[spellId].spec == activeTalentGroup or ASAuras_DB[spellId].spec == 3 then
+			ASAuras:CreateFrame(dstGUID,spellId)
+		end
+	else
+		-- Check if there is a frame for that buff already that has just been hidden
+		-- If not create it and show it
+		if auraframes[spellId] then
+			if (auraframes[spellId]:IsVisible() == nil) then
+				auraframes[spellId].dstGUID = dstGUID
+				auraframes[spellId]:Show()
+			else
+				auraframes[spellId].dstGUID = dstGUID
+			end
+		else
 			if ASAuras_DB[spellId].spec == activeTalentGroup or ASAuras_DB[spellId].spec == 3 then
 				ASAuras:CreateFrame(dstGUID,spellId)
 			end
-		else
-			-- Check if there is a frame for that buff already that has just been hidden
-			-- If not create it and show it
-			if auraframes[spellId] then
-				if (auraframes[spellId]:IsVisible() == nil) then
-					auraframes[spellId].dstGUID = dstGUID
-					auraframes[spellId]:Show()
-				else
-					auraframes[spellId].dstGUID = dstGUID
-				end
-			else
-				if ASAuras_DB[spellId].spec == activeTalentGroup or ASAuras_DB[spellId].spec == 3 then
-					ASAuras:CreateFrame(dstGUID,spellId)
-				end
-			end
 		end
-		auraframes[spellId]:SetScript("OnUpdate", function(self, elapsed)
-			ASAuras:UpdateAura(auraframes[spellId], elapsed)
-		end)
 	end
+	auraframes[spellId]:SetScript("OnUpdate", function(self, elapsed)
+		ASAuras:UpdateAura(auraframes[spellId], elapsed)
+	end)
 end
 
 function ASAuras:AuraRemoved(dstGUID,spellId)
-	local unitGUID = UnitGUID(ASAuras_DB[spellId].target)
-	if ( dstGUID == unitGUID ) then
-		-- Hide the frame
-		if auraframes[spellId] then
-			auraframes[spellId]:Hide()
-		end
-	end
+	auraframes[spellId]:Hide()
+	auraframes[spellId].elapsed = 0
+	auraframes[spellId]:SetScript("OnUpdate", nil)
+	auraframes[spellId].countdown:SetText("")
+	auraframes[spellId].stacks:SetText("")
 end
 
 function ASAuras:CreateFrame(dstGUID,spellId)
