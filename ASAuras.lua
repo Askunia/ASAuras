@@ -297,7 +297,6 @@ function ASAuras:CreateFrame(dstGUID,spellId)
 end
 
 function ASAuras:UpdateAura(auraframe, elapsed)
--- TODO: Auch überarbeiten !
 	auraframe.elapsed = auraframe.elapsed + elapsed
 	if ( auraframe.elapsed >= 0.1 ) then
 		-- Do something :P
@@ -308,6 +307,9 @@ function ASAuras:UpdateAura(auraframe, elapsed)
 				if UnitDebuff(unit,GetSpellInfo(auraframe.spellId),nil,"PLAYER") then
 					timeremaining = select(7,UnitDebuff(unit,GetSpellInfo(auraframe.spellId),nil,"PLAYER")) - GetTime()
 					stacks = select(4,UnitDebuff(unit,GetSpellInfo(auraframe.spellId),nil,"PLAYER"))
+				elseif UnitDebuff(unit,GetSpellInfo(auraframe.spellId) then
+					timeremaining = select(7,UnitDebuff(unit,GetSpellInfo(auraframe.spellId))) - GetTime()
+					stacks = select(4,UnitDebuff(unit,GetSpellInfo(auraframe.spellId)))
 				elseif UnitBuff(unit,GetSpellInfo(auraframe.spellId)) then
 					timeremaining = select(7,UnitAura(unit,GetSpellInfo(auraframe.spellId))) - GetTime()
 					stacks = select(4,UnitAura(unit,GetSpellInfo(auraframe.spellId)))
