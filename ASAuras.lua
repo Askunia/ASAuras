@@ -203,7 +203,7 @@ function ASAuras:COMBAT_LOG_EVENT_UNFILTERED(log_event, timestamp, event, hideCa
 				ASAuras:AuraApplied(dstGUID,spellId)
 			elseif UnitGUID("target") == dstGUID and ASAuras_DB[spellId].target == "target" then -- Buff or Debuff on the Target
 				ASAuras:AuraApplied(dstGUID,spellId)
-			elseif UnitGUID("focus") == dstGUID and ASAuras_DB[spellId}.target = "focus" then -- Buff or Debuff on the Focus
+			elseif UnitGUID("focus") == dstGUID and ASAuras_DB[spellId].target == "focus" then -- Buff or Debuff on the Focus
 				ASAuras:AuraApplied(dstGUID,spellId)
 			end
 		end
@@ -308,7 +308,7 @@ function ASAuras:UpdateAura(auraframe, elapsed)
 				if UnitDebuff(unit,GetSpellInfo(auraframe.spellId),nil,"PLAYER") then
 					timeremaining = select(7,UnitDebuff(unit,GetSpellInfo(auraframe.spellId),nil,"PLAYER")) - GetTime()
 					stacks = select(4,UnitDebuff(unit,GetSpellInfo(auraframe.spellId),nil,"PLAYER"))
-				elseif UnitDebuff(unit,GetSpellInfo(auraframe.spellId) then
+				elseif UnitDebuff(unit,GetSpellInfo(auraframe.spellId)) then
 					timeremaining = select(7,UnitDebuff(unit,GetSpellInfo(auraframe.spellId))) - GetTime()
 					stacks = select(4,UnitDebuff(unit,GetSpellInfo(auraframe.spellId)))
 				elseif UnitBuff(unit,GetSpellInfo(auraframe.spellId)) then
