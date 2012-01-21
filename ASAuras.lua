@@ -96,6 +96,7 @@ function ASAuras:PLAYER_REGEN_DISABLED(...)
 	ASAuras:SetScript("OnEvent", function(self, event, ...)
 		ASAuras[event](self, event, ...)
 	end)
+				
 	for index, auraframe in pairs(auraframes) do
 		if auraframe.target ~= "cd" then
 			auraframe:SetScript("OnUpdate", function(self, elapsed)
@@ -112,6 +113,15 @@ function ASAuras:PLAYER_REGEN_DISABLED(...)
 			local start, duration = GetSpellCooldown(auraframe.spellId)
 			if start == 0 and duration < 1.5 then
 				auraframe:Show()
+			end
+		end
+	end
+
+	-- Check all buffs that we check on the player, they might already be there and will not be picked up over the combatlog
+	for spellId, aura in pairs(ASAuras_DB) do
+		if aura.target == "player" and not auraframes[spellId] then
+			if UnitAura("player",GetSpellInfo(spellId)) then
+				ASAuras:AuraApplied(UnitGUID("player"),spellId)
 			end
 		end
 	end
