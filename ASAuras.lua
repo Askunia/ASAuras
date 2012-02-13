@@ -54,6 +54,7 @@ function ASAuras:Command(message)
 		spellId = tonumber(strsub(parameter,1,strfind(parameter," ")-1))
 		target = strsub(parameter,strfind(parameter," ")+1,strlen(parameter))
 		spec = strsub(parameter,strfind(parameter," ")+2,strlen(parameter))
+		-- TODO Hier stimmt die Parameter Auswertung nicht !!!
 		if (ASAuras_DB[spellId]~=nil) then
 			-- We already have that in our Database !!!
 			print("Spell is already monitored!")
@@ -240,6 +241,9 @@ function ASAuras:AuraApplied(dstGUID,spellId)
 			if (auraframes[spellId]:IsVisible() == nil) then
 				auraframes[spellId].dstGUID = dstGUID
 				auraframes[spellId]:Show()
+				auraframes[spellId]:SetSize(ASAuras_DB[spellId].width,ASAuras_DB[spellId].height)
+				auraframes[spellId].background:SetSize(ASAuras_DB[spellId].width,ASAuras_DB[spellId].height)
+				auraframes[spellId]:SetAlpha(1)
 			else
 				auraframes[spellId].dstGUID = dstGUID
 			end
@@ -260,6 +264,9 @@ function ASAuras:AuraRemoved(dstGUID,spellId)
 	auraframes[spellId]:SetScript("OnUpdate", nil)
 	auraframes[spellId].countdown:SetText("")
 	auraframes[spellId].stacks:SetText("")
+	auraframes[spellId]:SetSize(ASAuras_DB[spellId].width,ASAuras_DB[spellId].height)
+	auraframes[spellId].background:SetSize(ASAuras_DB[spellId].width,ASAuras_DB[spellId].height)
+	auraframes[spellId]:SetAlpha(1)
 end
 
 function ASAuras:CreateFrame(dstGUID,spellId)
@@ -320,6 +327,18 @@ function ASAuras:UpdateAura(auraframe, elapsed)
 					auraframe.stacks:SetText(string.format("%d",stacks))
 				else
 					auraframe.stacks:SetText("")
+				end
+				if auraframe.target ~= "cd" then
+					if timeremaining <= 2 then
+						auraframe:SetAlpha(1/timeremaining)
+						local width, height = auraframe:GetSize()
+						auraframe:SetSize(width+5,height+5)
+						auraframe.background:SetSize(width+5,height+5)
+					elseif auraframe:GetWidth() ~= ASAuras_DB[auraframe.spellId].width then
+						auraframe:SetSize(ASAuras_DB[auraframe.spellId].width,ASAuras_DB[auraframe.spellId].height)
+						auraframe.background:SetSize(ASAuras_DB[auraframe.spellId].width,ASAuras_DB[auraframe.spellId].height)
+						auraframe:SetAlpha(1)
+					end
 				end
 			end
 		else
